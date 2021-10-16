@@ -8,16 +8,16 @@ from datetime import datetime
 import sys
 import PySimpleGUI as sg
 
-# 1 Create database connection
-myconn = mysql.connector.connect(host="localhost", user="root", passwd="1234", database="facerecognition")
+globalCurrentName = 'Jack'
+globalCurrentID = 0
 
+# 1 Create database connection
+myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
 date = datetime.utcnow()
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
 cursor = myconn.cursor()
 
-
-# hello
 
 #2 Load recognize and read label from model
 recognizer = cv2.face.LBPHFaceRecognizer_create()
@@ -39,28 +39,44 @@ cap = cv2.VideoCapture(0)
 
 
 # 3 Define pysimplegui setting
+# Small gui window
 layout =  [
     [sg.Text('Setting', size=(18,1), font=('Any',18),text_color='#1c86ee' ,justification='left')],
-    [sg.Text('Confidence'), sg.Slider(range=(0,100),orientation='h', resolution=1, default_value=60, size=(15,15), key='confidence')],
-    [sg.OK(), sg.Cancel()]
+    [sg.Text('Confidence', key='cfd'), sg.Slider(range=(0,100),orientation='h', resolution=1, default_value=60, size=(15,15), key='confidence')],
+    [sg.OK(), sg.Cancel(), sg.Button('Test')],
+    [sg.OK(), sg.Cancel(), sg.Button('JJ')]
       ]
-
 win = sg.Window('iKYC System',
         default_element_size=(21,1),
         text_justification='right',
         auto_size_text=False).Layout(layout)
-
+print("I'm here1")
 event, values = win.Read()
-
 if event is None or event =='Cancel':
+    print("I'm here")
     exit()
+if event == 'Test':
+    win.Element('cfd').update('Deviance')
+    win.Element('confidence').update(visible=False)
+    print("Reached")
+
+
+#event, values = win.Read()
 
 args = values
 gui_confidence = args["confidence"]
 win_started = False
 
+win.close() # Closes small window after pressing "Ok"
+
+print("I'm there")
+
+breakCount = 0
+
 # 4 Open the camera and start face recognition
 while True:
+    breakCount = -1
+    break # self added
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=3)
@@ -81,6 +97,9 @@ while True:
             id += 1
             name = labels[id_]
             current_name = name
+            globalCurrentName = current_name
+            globalCurrentID = id_
+
             color = (255, 0, 0)
             stroke = 2
             cv2.putText(frame, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
@@ -96,6 +115,7 @@ while True:
             for x in result:
                 data = x
 
+
             # If the customer's information is not found in the database
             if data == "error":
                 # the customer's data is not in the database
@@ -105,9 +125,14 @@ while True:
             else:
                 """
                 Implement useful functions here.
-                
+
 
                 """
+                #cap.release()
+                #cv2.destroyAllWindows()
+                breakCount = -1
+                break
+
                 update =  "UPDATE Customer SET login_date=%s WHERE name=%s"
                 val = (date, current_name)
                 cursor.execute(update, val)
@@ -115,26 +140,32 @@ while True:
                 val = (current_time, current_name)
                 cursor.execute(update, val)
                 myconn.commit()
-               
+
                 hello = ("Hello ", current_name, "Welcom to the iKYC System")
                 print(hello)
                 engine.say(hello)
 
 
         # 4.2 If the face is unrecognized
-        else: 
+        else:
             color = (255, 0, 0)
             stroke = 2
             font = cv2.QT_FONT_NORMAL
             cv2.putText(frame, "UNKNOWN", (x, y), font, 1, color, stroke, cv2.LINE_AA)
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), (2))
             hello = ("Your face is not recognized")
+            cap.release()
+            cv2.destroyAllWindows()
             print(hello)
             engine.say(hello)
             # engine.runAndWait()
 
+    if breakCount == -1:
+        break
+
+
     # GUI
-    imgbytes = cv2.imencode('.png', frame)[1].tobytes() 
+    imgbytes = cv2.imencode('.png', frame)[1].tobytes()
     if not win_started:
         win_started = True
         layout = [
@@ -157,6 +188,67 @@ while True:
         break
     gui_confidence = values['confidence']
 
-        
 win.Close()
 cap.release()
+
+if breakCount != -1:
+    print("Premature closing")
+    exit(0)
+
+# Start Experimenting
+print("Yay I broke free")
+
+
+layout = [
+    [sg.Text('iKYC System Interface', size=(90, 30), key='Title', justification='center')],
+    [sg.Button('Account View'), sg.Button('Transaction List'), sg.Button('Back'), sg.Exit()],
+    [sg.Text('Confidence', key='conTitle'),
+        sg.Slider(range=(0, 100), orientation='h', resolution=1, default_value=60, size=(15, 15), key='confidence')]
+]
+win = sg.Window('Bank System',
+        default_element_size=(90, 30),
+        text_justification='right',
+        auto_size_text=False).Layout(layout)
+print("I'm here2")
+while True:
+    event, values = win.Read()
+    if event is None or event == 'Exit':
+        win.close()
+        exit(0)
+    if event == 'Account View':
+        # Call function here
+        win.Element('Title').Update(visible=False)
+        win.Element('conTitle').Update(visible=False)
+        win.Element('confidence').Update(visible=False)
+
+        cursor.execute("SELECT * FROM Account")
+        print(cursor.fetchall())
+
+
+    if event == 'Transaction List':
+        win.Element('Title').Update(visible=False)
+        win.Element('confidence').Update(visible=False)
+    if event == 'Back':
+        win.Element('Title').Update(visible=True)
+        win.Element('conTitle').Update(visible=True)
+        win.Element('confidence').Update(visible=True)
+
+
+
+
+
+
+
+# ======== Page Navigation Functions =========
+
+
+
+
+# ======== SQL Functions =========
+
+def testSQL(myconn):
+    myconn.database = "face3278"
+    query =  "SELECT * FROM Customer"
+    mycursor = myconn.cursor()
+    mycursor.execute(query)
+    return
