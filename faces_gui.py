@@ -16,6 +16,8 @@ current_time = now.strftime("%H:%M:%S")
 cursor = myconn.cursor()
 
 
+# hello
+
 #2 Load recognize and read label from model
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read("train.yml")
