@@ -7,12 +7,15 @@ import pickle
 from datetime import datetime
 import sys
 import PySimpleGUI as sg
+from prettytable import PrettyTable
+# remember to "pip3 install PTable"
 
 globalCurrentName = 'Jack'
 globalCurrentID = 0
 
 # 1 Create database connection
-myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
+# myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
+
 date = datetime.utcnow()
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
@@ -43,8 +46,7 @@ cap = cv2.VideoCapture(0)
 layout =  [
     [sg.Text('Setting', size=(18,1), font=('Any',18),text_color='#1c86ee' ,justification='left')],
     [sg.Text('Confidence', key='cfd'), sg.Slider(range=(0,100),orientation='h', resolution=1, default_value=60, size=(15,15), key='confidence')],
-    [sg.OK(), sg.Cancel(), sg.Button('Test')],
-    [sg.OK(), sg.Cancel(), sg.Button('JJ')]
+    [sg.OK(), sg.Cancel(), sg.Button('Test')]
       ]
 win = sg.Window('iKYC System',
         default_element_size=(21,1),
@@ -133,17 +135,43 @@ while True:
                 breakCount = -1
                 break
 
-                update =  "UPDATE Customer SET login_date=%s WHERE name=%s"
-                val = (date, current_name)
+                update =  "UPDATE Login_history SET date_time=%s WHERE customer_id=%i"
+                val = (date, globalCurrentID)
                 cursor.execute(update, val)
-                update = "UPDATE Customer SET login_time=%s WHERE name=%s"
-                val = (current_time, current_name)
-                cursor.execute(update, val)
+                # update = "UPDATE Customer SET login_time=%s WHERE name=%s"
+                # val = (current_time, current_name)
+                # cursor.execute(update, val)
                 myconn.commit()
 
-                hello = ("Hello ", current_name, "Welcom to the iKYC System")
+                # hello = ("Hello ", current_name, "Welcom to the iKYC System")
+                hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" (date))
+                # hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" %(date))
                 print(hello)
                 engine.say(hello)
+
+                select_history = "SELECT * FROM Login_history WHERE customer_id=%i ORDER BY date_time ASC"
+                val = (globalCurrentID)
+                cursor.execute(select_history, val)
+                myconn.commit()
+                history = cursor.fetchall()
+
+                # table way
+                # history_table = PrettyTable()
+                # history_table.col = ["Login Date", "Login Time"]
+                # for i in history:
+                #     h_date = i.split(' ')[0]
+                #     h_time = i.split(' ')[1]
+                #     history_table.add_row([h_date, h_time])
+
+                # print(history_table)
+                # engine.say(history_table)
+
+                #sg way
+
+
+
+
+
 
 
         # 4.2 If the face is unrecognized
@@ -203,7 +231,8 @@ layout = [
     [sg.Text('iKYC System Interface', size=(90, 30), key='Title', justification='center')],
     [sg.Button('Account View'), sg.Button('Transaction List'), sg.Button('Back'), sg.Exit()],
     [sg.Text('Confidence', key='conTitle'),
-        sg.Slider(range=(0, 100), orientation='h', resolution=1, default_value=60, size=(15, 15), key='confidence')]
+        sg.Slider(range=(0, 100), orientation='h', resolution=1, default_value=60, size=(15, 15), key='confidence')],
+    [sg.Button('Show Login History', key='__HISTORY__')]
 ]
 win = sg.Window('Bank System',
         default_element_size=(90, 30),
@@ -252,3 +281,36 @@ def testSQL(myconn):
     mycursor = myconn.cursor()
     mycursor.execute(query)
     return
+
+
+# ======== Login =========
+def login(myconn):
+    # hello = ("Hello ", current_name, "Welcom to the iKYC System")
+    hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" (date))
+    # hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" %(date))
+    print(hello)
+    engine.say(hello)
+
+
+    select_history = "SELECT * FROM Login_history WHERE customer_id=%i ORDER BY date_time ASC"
+    val = (globalCurrentID)
+    cursor.execute(select_history, val)
+    myconn.commit()
+    history = cursor.fetchall()
+
+    sg.update()
+
+    # table way
+    history_table = PrettyTable()
+    history_table.col = ["Login Date", "Login Time"]
+    for i in history:
+        h_date = i.split(' ')[0]
+        h_time = i.split(' ')[1]
+        history_table.add_row([h_date, h_time])
+
+    # print(history_table)
+    # engine.say(history_table)
+
+    #sg way
+
+
