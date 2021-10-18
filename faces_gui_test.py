@@ -11,12 +11,17 @@ from prettytable import PrettyTable
 # remember to "pip3 install PTable"
 
 globalCurrentName = 'Jack'
-globalCurrentID = 0
+globalCurrentID = 1003
 
 # 1 Create database connection
 # myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
+myconn = mysql.connector.connect(host="localhost", user="root", passwd="hkbcps040076", database="facerecognition")
 
 date = datetime.utcnow()
+date = date.strftime('%Y-%m-%d %H:%M:%S')
+
+print(date)
+
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
 cursor = myconn.cursor()
@@ -63,13 +68,15 @@ if event == 'Test':
     print("Reached")
 
 
-#event, values = win.Read()
+event, values = win.Read()
+if event is None or event =='Cancel':
+    exit()
 
 args = values
 gui_confidence = args["confidence"]
 win_started = False
 
-win.close() # Closes small window after pressing "Ok"
+# win.close() # Closes small window after pressing "Ok"
 
 print("I'm there")
 
@@ -77,8 +84,8 @@ breakCount = 0
 
 # 4 Open the camera and start face recognition
 while True:
-    breakCount = -1
-    break # self added
+    # breakCount = -1
+    # break # self added
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=3)
@@ -108,11 +115,13 @@ while True:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), (2))
 
             # Find the customer information in the database.
-            select = "SELECT customer_id, name, DAY(login_date), MONTH(login_date), YEAR(login_date) FROM Customer WHERE name='%s'" % (name)
+            select = "SELECT customer_id, customer_name, face_id FROM Customer WHERE face_id=%i" % (globalCurrentID)
+            # print(globalCurrentID)
             name = cursor.execute(select)
             result = cursor.fetchall()
             # print(result)
             data = "error"
+            # print(result)
 
             for x in result:
                 data = x
@@ -132,28 +141,31 @@ while True:
                 """
                 #cap.release()
                 #cv2.destroyAllWindows()
-                breakCount = -1
-                break
+                # breakCount = -1
+                # break
 
-                update =  "UPDATE Login_history SET date_time=%s WHERE customer_id=%i"
-                val = (date, globalCurrentID)
-                cursor.execute(update, val)
+                update =  "UPDATE Login_History SET date_time='%s' WHERE customer_id=%i" % (date, data[0])
+                # val = (date, data[0])
+                cursor.execute(update)
                 # update = "UPDATE Customer SET login_time=%s WHERE name=%s"
                 # val = (current_time, current_name)
                 # cursor.execute(update, val)
-                myconn.commit()
+                # myconn.commit()
 
                 # hello = ("Hello ", current_name, "Welcom to the iKYC System")
-                hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" (date))
+                hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" % (date))
                 # hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" %(date))
-                print(hello)
+                # print(hello)
                 engine.say(hello)
 
-                select_history = "SELECT * FROM Login_history WHERE customer_id=%i ORDER BY date_time ASC"
-                val = (globalCurrentID)
-                cursor.execute(select_history, val)
-                myconn.commit()
+                select_history = "SELECT * FROM Login_History WHERE customer_id=%i ORDER BY date_time ASC" % (data[0])
+                # val = (data[0])
+                # cursor.execute(select_history, val)
+                # print(select_history)
+                cursor.execute(select_history)
+                # myconn.commit()
                 history = cursor.fetchall()
+                break
 
                 # table way
                 # history_table = PrettyTable()
@@ -182,14 +194,14 @@ while True:
             cv2.putText(frame, "UNKNOWN", (x, y), font, 1, color, stroke, cv2.LINE_AA)
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), (2))
             hello = ("Your face is not recognized")
-            cap.release()
-            cv2.destroyAllWindows()
+            # cap.release()
+            # cv2.destroyAllWindows()
             print(hello)
             engine.say(hello)
             # engine.runAndWait()
 
-    if breakCount == -1:
-        break
+    # if breakCount == -1:
+    #     break
 
 
     # GUI

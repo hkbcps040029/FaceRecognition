@@ -7,6 +7,11 @@
 -- Server version: 5.7.28-0ubuntu0.18.04.4
 -- PHP Version: 7.2.24-0ubuntu0.18.04.1
 
+DROP DATABASE IF EXISTS `facerecognition`;
+CREATE DATABASE facerecognition;
+USE facerecognition;
+
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
@@ -26,20 +31,24 @@ SET time_zone = "+00:00";
 -- Table structure for table `Customer`
 --
 DROP TABLE IF EXISTS `Customer`;
+DROP TABLE IF EXISTS `Account`;
+DROP TABLE IF EXISTS `Internal_Trans`;
+DROP TABLE IF EXISTS `External_Trans`;
+DROP TABLE IF EXISTS `Login_History`;
 
 # Create TABLE 'Customer'
-CREATE TABLE `Customer` (
-  `customer_id` int NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `login_time` time NOT NULL,
-  `login_date` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+-- CREATE TABLE `Customer` (
+--   `customer_id` int NOT NULL,
+--   `name` varchar(50) NOT NULL,
+--   `login_time` time NOT NULL,
+--   `login_date` date NOT NULL
+-- ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `Customer` WRITE;
-/*!40000 ALTER TABLE `Customer` DISABLE KEYS */;
-INSERT INTO `Customer` VALUES (1, "JACK", NOW(), '2021-09-01');
-/*!40000 ALTER TABLE `Customer` ENABLE KEYS */;
-UNLOCK TABLES;
+-- LOCK TABLES `Customer` WRITE;
+-- /*!40000 ALTER TABLE `Customer` DISABLE KEYS */;
+-- INSERT INTO `Customer` VALUES (1, "JACK", NOW(), '2021-09-01');
+-- /*!40000 ALTER TABLE `Customer` ENABLE KEYS */;
+-- UNLOCK TABLES;
 
 
 # Create TABLE 'Account'
@@ -56,7 +65,7 @@ UNLOCK TABLES;
 
 
 -- New Additions
-/*
+
 
 -- Setting up Tables
 
@@ -116,11 +125,12 @@ FOREIGN KEY(customer_id) references Customer(customer_id)
 ALTER TABLE Internal_Trans AUTO_INCREMENT=1;
 
 
-============= ADD DUMMY DATA ============
+-- ============= ADD DUMMY DATA ============
 
 INSERT INTO Customer VALUES
 (1001, 'Tamanna', 1),
-(1002, 'Andy', 2);
+(1002, 'Andy', 2),
+(1003, 'Jack', 0);
 
 INSERT INTO Account VALUES
 (661, 'Savings', 1200.06, 'HKD', 1001),
@@ -140,4 +150,4 @@ INSERT INTO External_Trans VALUES
 
 
 
-*/
+
