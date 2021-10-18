@@ -8,14 +8,14 @@ from datetime import datetime
 import sys
 import PySimpleGUI as sg
 from prettytable import PrettyTable
-# remember to "pip3 install PTable"
+# remember to "pip install PTable"
 
 globalCurrentName = 'Jack'
 globalCurrentID = 1003
 
 # 1 Create database connection
-# myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
-myconn = mysql.connector.connect(host="localhost", user="root", passwd="hkbcps040076", database="facerecognition")
+myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
+
 
 date = datetime.utcnow()
 date = date.strftime('%Y-%m-%d %H:%M:%S')
