@@ -135,7 +135,11 @@ INSERT INTO Customer VALUES
 INSERT INTO Account VALUES
 (661, 'Savings', 1200.06, 'HKD', 1001),
 (662, 'Current', 5000.88, 'USD', 1002),
-(663, 'Savings', 400000.21, 'HKD', 1002);
+(663, 'Savings', 400000.21, 'HKD', 1002),
+(664, 'Savings', 123456.21, 'HKD', 1003),
+(665, 'Current', 654321.21, 'HKD', 1003),
+(666, 'Savings', 5000.21, 'USD', 1003),
+(667, 'Current', 80000.21, 'USD', 1003);
 
 INSERT INTO Login_History VALUES
 ('2019-10-07 21:58:52', 1001),
