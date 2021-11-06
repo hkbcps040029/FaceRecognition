@@ -8,13 +8,15 @@ from datetime import datetime
 import sys
 import PySimpleGUI as sg
 import tkinter as tk
+from test_trans_view import *
 
 globalCurrentName = 'Jack'
 globalCurrentID = 1003
 globalAccountID = None
 
 # 1 Create database connection
-myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
+# myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
+
 
 date = datetime.utcnow()
 date = date.strftime('%Y-%m-%d %H:%M:%S')
@@ -270,11 +272,12 @@ while True:
                 win.Element('_SUMMARY_').Update(visible=True)
                 win.Element('_SUMMARY_').Update(values=summary)
 
+                event, values = win.Read()
+                if event == '_TV_':
+                    transview()
+
             else:
                 choosing_account = False
-
-
-
 
     if event == 'Login History':
         c[0] = 0
@@ -285,57 +288,3 @@ while True:
         win.Element('_SUMMARY_').Update(visible=False)
         win.Element('_CHECK_TRAN_MSG_').Update(visible=False)
         win.Element('_TV_').Update(visible=False)
-
-
-    # if event == 'Transaction List':
-    #     c[0] = 2
-    #     win.Element('_W_MSG_1_').Update(value='%s, this is your transaction list.' % (globalCurrentName))
-    #     win.Element('_HISTORY_').Update(visible=False)
-
-
-# ======== Page Navigation Functions =========
-
-
-
-
-# ======== SQL Functions =========
-
-def testSQL(myconn):
-    myconn.database = "face3278"
-    query =  "SELECT * FROM Customer"
-    mycursor = myconn.cursor()
-    mycursor.execute(query)
-    return
-
-
-# ======== Login =========
-def login(myconn):
-    # hello = ("Hello ", current_name, "Welcom to the iKYC System")
-    hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" (date))
-    # hello = ("Hello ", globalCurrentName, "Welcom to the Bank ABC", "\nYour current login time is: %s" %(date))
-    print(hello)
-    engine.say(hello)
-
-
-    select_history = "SELECT * FROM Login_history WHERE customer_id=%i ORDER BY date_time ASC"
-    val = (globalCurrentID)
-    cursor.execute(select_history, val)
-    myconn.commit()
-    history = cursor.fetchall()
-
-    sg.update()
-
-    # table way
-    history_table = PrettyTable()
-    history_table.col = ["Login Date", "Login Time"]
-    for i in history:
-        h_date = i.split(' ')[0]
-        h_time = i.split(' ')[1]
-        history_table.add_row([h_date, h_time])
-
-    # print(history_table)
-    # engine.say(history_table)
-
-    #sg way
-
-
