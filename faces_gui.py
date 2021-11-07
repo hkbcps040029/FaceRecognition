@@ -10,11 +10,11 @@ import PySimpleGUI as sg
 
 # 1 Create database connection
 myconn = mysql.connector.connect(host="localhost", user="root", passwd="1234", database="facerecognition")
+
 date = datetime.utcnow()
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
 cursor = myconn.cursor()
-
 
 #2 Load recognize and read label from model
 recognizer = cv2.face.LBPHFaceRecognizer_create()
@@ -104,12 +104,13 @@ while True:
                 
 
                 """
-                update =  "UPDATE Customer SET login_date=%s WHERE name=%s"
-                val = (date, current_name)
+                # update =  "UPDATE Customer SET login_date=%s WHERE name=%s"
+                update =  "UPDATE Login_history SET date_time=%s WHERE customer_id=%i"
+                val = (date, current_id)
                 cursor.execute(update, val)
-                update = "UPDATE Customer SET login_time=%s WHERE name=%s"
-                val = (current_time, current_name)
-                cursor.execute(update, val)
+                # update = "UPDATE Customer SET login_time=%s WHERE name=%s"
+                # val = (current_time, current_name)
+                # cursor.execute(update, val)
                 myconn.commit()
                
                 hello = ("Hello ", current_name, "Welcom to the iKYC System")
