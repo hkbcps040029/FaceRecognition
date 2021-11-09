@@ -15,9 +15,10 @@ sg.theme('lightblue3')
 globalCurrentName = 'Jack'
 globalCurrentID = 1003
 globalAccountID = None
+prev_currency = 'HKD'
 
 # 1 Create database connection
-myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="face3278")
+myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="testDB")
 
 
 date = datetime.now()
@@ -211,7 +212,7 @@ def transview(account_number, win):
     current_year = curr_date.year
     current_day = curr_date.day
 
-    prev_currency='HKD'
+    global prev_currency
 
     calendar_start_date = '1995-08-15'
     calendar_start_year = (int) (calendar_start_date[0:4])
@@ -377,9 +378,16 @@ else:
     while True:
         event, values = win.Read()
         if event == 'Login':
-            select = "SELECT customer_id, customer_name, face_id FROM Customer WHERE customer_id=%s AND password=%s" % (values['_pwd_cid_'],values['_pwd_pwd_'])
-            name = cursor.execute(select)
-            result = cursor.fetchall()
+            result = ['error']
+            if values['_pwd_cid_'] == '' or values['_pwd_pwd_'] == '':
+                win.Element('loginfail').update(visible=True)
+            else:
+                try:
+                    select = "SELECT customer_id, customer_name, face_id FROM Customer WHERE customer_id=%s AND password=%s" % (values['_pwd_cid_'],values['_pwd_pwd_'])
+                    name = cursor.execute(select)
+                    result = cursor.fetchall()
+                except:
+                    result = ['error']
             data = "error"
 
             for x in result:
@@ -390,6 +398,8 @@ else:
             if data == "error":
                 # the customer's data is not in the database
                 win.Element('loginfail').update(visible=True)
+                win.Element('_pwd_cid_').update(value='')
+                win.Element('_pwd_pwd_').update(value='')
 
             # If the customer's information is found in the database
             else:
