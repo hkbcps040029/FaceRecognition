@@ -30,15 +30,14 @@ SET time_zone = "+00:00";
 --
 -- Table structure for table `Customer`
 --
-DROP TABLE IF EXISTS `customer`;
-DROP TABLE IF EXISTS `account`;
-DROP TABLE IF EXISTS `internal_trans`;
-DROP TABLE IF EXISTS `external_trans`;
-DROP TABLE IF EXISTS `externalaccounts`;
-DROP TABLE IF EXISTS `externalreceive`;
-DROP TABLE IF EXISTS `externalsend`;
-DROP TABLE IF EXISTS `login_history`;
-DROP TABLE IF EXISTS `transactions`;
+DROP TABLE IF EXISTS `Customer`;
+DROP TABLE IF EXISTS `Account`;
+DROP TABLE IF EXISTS `Internal_Trans`;
+DROP TABLE IF EXISTS `ExternalAccounts`;
+DROP TABLE IF EXISTS `ExternalReceive`;
+DROP TABLE IF EXISTS `ExternalSend`;
+DROP TABLE IF EXISTS `Login_History`;
+DROP TABLE IF EXISTS `Transactions`;
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
@@ -53,7 +52,7 @@ DROP TABLE IF EXISTS `transactions`;
 
 
 -- Setting up Tables
-CREATE TABLE customer
+CREATE TABLE Customer
 (
 customer_id INT NOT NULL,
 customer_name VARCHAR(50) NOT NULL,
@@ -62,7 +61,7 @@ face_id INT NOT NULL,
 PRIMARY KEY(customer_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE account
+CREATE TABLE Account
 (
 account_id INT NOT NULL,
 account_type VARCHAR(7) NOT NULL,
@@ -73,63 +72,57 @@ PRIMARY KEY(account_id),
 FOREIGN KEY(customer_id) REFERENCES Customer(customer_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE transactions
+CREATE TABLE Transactions
 (
 transaction_id INT NOT NULL AUTO_INCREMENT,
+transaction_description VARCHAR(50),
+date_n_time DATETIME NOT NULL,
+amount FLOAT UNSIGNED NOT NULL,
 PRIMARY KEY(transaction_id)
 )ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE internal_trans
+CREATE TABLE Internal_Trans
 (
 transaction_id INT NOT NULL,
 target_acc INT NOT NULL,
-transaction_description VARCHAR(50),
-date_n_time DATETIME NOT NULL,
-amount FLOAT UNSIGNED NOT NULL, # Change to UNSIGNED
 account_id INT NOT NULL,
 PRIMARY KEY(transaction_id),
-FOREIGN KEY(transaction_id) references transactions(transaction_id),
-FOREIGN KEY(account_id) references account(account_id),
-FOREIGN KEY(target_acc) references account(account_id)
+FOREIGN KEY(transaction_id) references Transactions(transaction_id),
+FOREIGN KEY(account_id) references Account(account_id),
+FOREIGN KEY(target_acc) references Account(account_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE externalaccounts(
+CREATE TABLE ExternalAccounts(
 bank_name VARCHAR(50) NOT NULL,
 account_id INT UNSIGNED NOT NULL,
 PRIMARY KEY(bank_name, account_id)
 )ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE externalreceive(
+CREATE TABLE ExternalReceive(
 transaction_id INT NOT NULL,
-transaction_description VARCHAR(50),
-date_n_time DATETIME NOT NULL,
-amount FLOAT UNSIGNED NOT NULL,
 target_account_id INT NOT NULL,
 sender_bank_name VARCHAR(50) NOT NULL,
 sender_account_id INT UNSIGNED NOT NULL,
 PRIMARY KEY(transaction_id),
-FOREIGN KEY(transaction_id) references transactions(transaction_id),
+FOREIGN KEY(transaction_id) references Transactions(transaction_id),
 FOREIGN KEY(sender_bank_name, sender_account_id) references ExternalAccounts(bank_name, account_id),
 FOREIGN KEY(target_account_id) references Account(account_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE externalsend(
+CREATE TABLE ExternalSend(
 transaction_id INT NOT NULL,
-transaction_description VARCHAR(50),
-date_n_time DATETIME NOT NULL,
-amount FLOAT UNSIGNED NOT NULL,
 sender_account_id INT NOT NULL,
 receiver_bank_name VARCHAR(50) NOT NULL,
 receiver_account_id INT UNSIGNED NOT NULL,
 PRIMARY KEY(transaction_id),
-FOREIGN KEY(transaction_id) references transactions(transaction_id),
+FOREIGN KEY(transaction_id) references Transactions(transaction_id),
 FOREIGN KEY(receiver_bank_name, receiver_account_id) references ExternalAccounts(bank_name, account_id),
 FOREIGN KEY(sender_account_id) references Account(account_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 
-CREATE TABLE login_history
+CREATE TABLE Login_History
 (
 date_time DATETIME NOT NULL,
 customer_id INT NOT NULL,
@@ -138,13 +131,13 @@ FOREIGN KEY(customer_id) references Customer(customer_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- ============= ADD DUMMY DATA ============
-INSERT INTO customer VALUES
-(1001, 'Tamanna','654321', 1),
+INSERT INTO Customer VALUES
+(1001, 'Dhruv','654321', 1),
 (1002, 'Andy', 'abcdef', 2),
-(1003, 'Dhruv', 'fedcba', 3),
+(1003, 'Tamanna', 'fedcba', 3),
 (1004, 'Sam', '123456', 4);
 
-INSERT INTO account VALUES
+INSERT INTO Account VALUES
 (661, 'Savings', 1200.06, 'HKD', 1001),
 (662, 'Current', 5000.88, 'USD', 1002),
 (663, 'Savings', 400000.21, 'HKD', 1002),
@@ -154,9 +147,9 @@ INSERT INTO account VALUES
 (667, 'Savings', 1000000.11, 'HKD', 1004),
 (668, 'Current', 70900.11, 'USD', 1004);
 
-INSERT INTO transactions VALUES (),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),();
+INSERT INTO Transactions VALUES (),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),(),();
 
-INSERT INTO internal_trans VALUES
+INSERT INTO Internal_Trans VALUES
 (2, 661, 'Pay for bills', '2015-12-19 14:02:59', 500.25, 662),
 (6, 661, 'Hello!', '2016-12-19 14:06:59', 25, 663),
 (10, 661, 'Pay', '2016-12-19 14:10:59', 4000.67, 665),
@@ -178,7 +171,7 @@ INSERT INTO internal_trans VALUES
 (33, 662, "Thank you for your help!!! Here's 20HKD", '2020-03-16 15:33:59', 20, 661),
 (37, 665, 'Pay for bills', '2021-03-16 15:37:59', 35.22, 661);
 
-INSERT INTO externalaccounts VALUES
+INSERT INTO ExternalAccounts VALUES
 ('Bank of Delta', 55112),
 ('Bank of Delta', 55331),
 ('Bank of Sigma', 3212),
@@ -186,7 +179,7 @@ INSERT INTO externalaccounts VALUES
 
 
 
-INSERT INTO externalreceive VALUES
+INSERT INTO ExternalReceive VALUES
 (4, 'Pay for bills', '2015-12-19 14:04:59', 500.25, 661, 'Bank of Delta', 55112),
 (8, 'Hello!', '2016-12-19 14:08:59', 25, 661, 'Bank of Sigma', 3212),
 (12, 'Pay', '2016-12-19 14:12:59', 4002.67, 661, 'Bank of Sigma', 3206),
@@ -198,7 +191,7 @@ INSERT INTO externalreceive VALUES
 (36, "Thank you for your help!!! Here's 50USD", '2020-03-16 15:36:59', 350, 661, 'Bank of Sigma', 3212),
 (40, 'Pay for bills', '2021-03-16 15:40:59', 1235, 661, 'Bank of Delta', 55331);
 
-INSERT INTO externalsend VALUES
+INSERT INTO ExternalSend VALUES
 (3, 'bill', '2015-12-19 14:03:59', 120, 661, 'Bank of Sigma', 3206),
 (7, 'Hi', '2016-12-19 14:07:59', 156, 661, 'Bank of Sigma', 3212),
 (11, 'Payment', '2016-12-19 14:11:59', 1020, 661, 'Bank of Delta', 55331),
@@ -210,7 +203,7 @@ INSERT INTO externalsend VALUES
 (35, "Thank you for your help!!! Here's 5000HKD", '2020-03-16 15:35:59', 5000, 661, 'Bank of Delta', 55331),
 (39, 'Pay for bills', '2021-03-16 15:39:59', 352.22, 661, 'Bank of Sigma', 3206);
 
-INSERT INTO login_history VALUES
+INSERT INTO Login_History VALUES
 ('2019-10-07 21:58:52', 1001),
 ('2018-12-31 16:13:31', 1001),
 ('2017-11-20 14:42:04', 1001),
