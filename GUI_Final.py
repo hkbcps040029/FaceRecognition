@@ -121,82 +121,88 @@ def searchFunction(win, search_limits, account_number, currency, sortType, order
 
     send_tab_query = f'''SELECT *
     FROM (
-    SELECT it.transaction_id, it.transaction_description, it.date_n_time, it.amount, it.target_acc, BankName.c
-    FROM internal_trans as it,(
+    SELECT IT.transaction_id AS transaction_id, T.transaction_description AS transaction_description, T.date_n_time AS date_n_time, T.amount AS amount, IT.target_acc AS target_acc, BankName.c AS bankname
+    FROM Internal_Trans AS IT,(
     SELECT "ABC Bank" COLLATE utf8mb4_general_ci
-    ) as BankName(c)
-    WHERE it.account_id = {account_number} AND
-    DATE(it.date_n_time) >="{search_limits['date'][0]}" AND
-    DATE(it.date_n_time) <="{search_limits['date'][1]}" AND
-    HOUR(it.date_n_time) >={search_limits['hour'][0]} AND
-    HOUR(it.date_n_time) <={search_limits['hour'][1]} AND
-    YEAR(it.date_n_time) >={search_limits['year'][0]} AND
-    YEAR(it.date_n_time) <={search_limits['year'][1]} AND
-    MONTH(it.date_n_time) >={search_limits['month'][0]} AND
-    MONTH(it.date_n_time) <={search_limits['month'][1]} AND
-    DAY(it.date_n_time) >={search_limits['day'][0]} AND
-    DAY(it.date_n_time) <={search_limits['day'][1]} AND
-    it.amount >= {int(search_limits['amount'][0]) / conversion_ratio[currency]} AND
-    it.amount <= {int(search_limits['amount'][1]) / conversion_ratio[currency]}
+    ) as BankName(c),
+    Transactions AS T
+    WHERE IT.account_id = {account_number} AND
+    T.transaction_id = IT.transaction_id AND
+    DATE(T.date_n_time) >="{search_limits['date'][0]}" AND
+    DATE(T.date_n_time) <="{search_limits['date'][1]}" AND
+    HOUR(T.date_n_time) >={search_limits['hour'][0]} AND
+    HOUR(T.date_n_time) <={search_limits['hour'][1]} AND
+    YEAR(T.date_n_time) >={search_limits['year'][0]} AND
+    YEAR(T.date_n_time) <={search_limits['year'][1]} AND
+    MONTH(T.date_n_time) >={search_limits['month'][0]} AND
+    MONTH(T.date_n_time) <={search_limits['month'][1]} AND
+    DAY(T.date_n_time) >={search_limits['day'][0]} AND
+    DAY(T.date_n_time) <={search_limits['day'][1]} AND
+    T.amount >= {int(search_limits['amount'][0]) / conversion_ratio[currency]} AND
+    T.amount <= {int(search_limits['amount'][1]) / conversion_ratio[currency]}
 
     UNION
 
-    SELECT transaction_id, transaction_description, date_n_time, amount, receiver_account_id, receiver_bank_name
-    FROM externalsend
-    WHERE sender_account_id = {account_number} AND
-    DATE(date_n_time) >="{search_limits['date'][0]}" AND
-    DATE(date_n_time) <="{search_limits['date'][1]}" AND
-    HOUR(date_n_time) >={search_limits['hour'][0]} AND
-    HOUR(date_n_time) <={search_limits['hour'][1]} AND
-    YEAR(date_n_time) >={search_limits['year'][0]} AND
-    YEAR(date_n_time) <={search_limits['year'][1]} AND
-    MONTH(date_n_time) >={search_limits['month'][0]} AND
-    MONTH(date_n_time) <={search_limits['month'][1]} AND
-    DAY(date_n_time) >={search_limits['day'][0]} AND
-    DAY(date_n_time) <={search_limits['day'][1]} AND
-    amount >= {int(search_limits['amount'][0]) / conversion_ratio[currency]} AND
-    amount <= {int(search_limits['amount'][1]) / conversion_ratio[currency]}
+    SELECT ES.transaction_id AS transaction_id, T.transaction_description AS transaction_description, T.date_n_time AS date_n_time, T.amount AS amount, ES.receiver_account_id AS target_acc, ES.receiver_bank_name AS bankname
+    FROM ExternalSend AS ES, Transactions AS T
+    WHERE ES.sender_account_id = {account_number} AND
+    T.transaction_id = ES.transaction_id AND
+    DATE(T.date_n_time) >="{search_limits['date'][0]}" AND
+    DATE(T.date_n_time) <="{search_limits['date'][1]}" AND
+    HOUR(T.date_n_time) >={search_limits['hour'][0]} AND
+    HOUR(T.date_n_time) <={search_limits['hour'][1]} AND
+    YEAR(T.date_n_time) >={search_limits['year'][0]} AND
+    YEAR(T.date_n_time) <={search_limits['year'][1]} AND
+    MONTH(T.date_n_time) >={search_limits['month'][0]} AND
+    MONTH(T.date_n_time) <={search_limits['month'][1]} AND
+    DAY(T.date_n_time) >={search_limits['day'][0]} AND
+    DAY(T.date_n_time) <={search_limits['day'][1]} AND
+    T.amount >= {int(search_limits['amount'][0]) / conversion_ratio[currency]} AND
+    T.amount <= {int(search_limits['amount'][1]) / conversion_ratio[currency]}
     ) as A
     ORDER BY {order_stringlist[0]+','+order_stringlist[1]+';' if(sortType == 'Time') else order_stringlist[1]+','+order_stringlist[0]+';'}
     '''
 
     receive_tab_query = f'''SELECT *
     FROM (
-    SELECT it.transaction_id, it.transaction_description, it.date_n_time, it.amount, it.account_id, BankName.c
-    FROM internal_trans as it,(
+    SELECT IT.transaction_id AS transaction_id, T.transaction_description AS transaction_description, T.date_n_time AS date_n_time, T.amount AS amount, IT.account_id AS sender, BankName.c AS bankname
+    FROM Internal_Trans AS IT,(
     SELECT "ABC Bank" COLLATE utf8mb4_general_ci
-    ) as BankName(c)
-    WHERE it.target_acc = {account_number} AND
-    DATE(it.date_n_time) >="{search_limits['date'][0]}" AND
-    DATE(it.date_n_time) <="{search_limits['date'][1]}" AND
-    HOUR(it.date_n_time) >={search_limits['hour'][0]} AND
-    HOUR(it.date_n_time) <={search_limits['hour'][1]} AND
-    YEAR(it.date_n_time) >={search_limits['year'][0]} AND
-    YEAR(it.date_n_time) <={search_limits['year'][1]} AND
-    MONTH(it.date_n_time) >={search_limits['month'][0]} AND
-    MONTH(it.date_n_time) <={search_limits['month'][1]} AND
-    DAY(it.date_n_time) >={search_limits['day'][0]} AND
-    DAY(it.date_n_time) <={search_limits['day'][1]} AND
-    it.amount >= {int(search_limits['amount'][0]) / conversion_ratio[currency]} AND
-    it.amount <= {int(search_limits['amount'][1]) / conversion_ratio[currency]}
+    ) as BankName(c),
+    Transactions AS T
+    WHERE IT.target_acc = {account_number} AND
+    T.transaction_id = IT.transaction_id AND
+    DATE(T.date_n_time) >="{search_limits['date'][0]}" AND
+    DATE(T.date_n_time) <="{search_limits['date'][1]}" AND
+    HOUR(T.date_n_time) >={search_limits['hour'][0]} AND
+    HOUR(T.date_n_time) <={search_limits['hour'][1]} AND
+    YEAR(T.date_n_time) >={search_limits['year'][0]} AND
+    YEAR(T.date_n_time) <={search_limits['year'][1]} AND
+    MONTH(T.date_n_time) >={search_limits['month'][0]} AND
+    MONTH(T.date_n_time) <={search_limits['month'][1]} AND
+    DAY(T.date_n_time) >={search_limits['day'][0]} AND
+    DAY(T.date_n_time) <={search_limits['day'][1]} AND
+    T.amount >= {int(search_limits['amount'][0]) / conversion_ratio[currency]} AND
+    T.amount <= {int(search_limits['amount'][1]) / conversion_ratio[currency]}
 
     UNION
 
-    SELECT transaction_id, transaction_description, date_n_time, amount, sender_account_id, sender_bank_name
-    FROM externalreceive
+    SELECT ER.transaction_id AS transaction_id, T.transaction_description AS transaction_description, T.date_n_time AS date_n_time, T.amount AS amount, ER.sender_account_id AS sender, ER.sender_bank_name AS bankname
+    FROM ExternalReceive AS ER, Transactions AS T
     WHERE target_account_id = {account_number} AND
-    DATE(date_n_time) >="{search_limits['date'][0]}" AND
-    DATE(date_n_time) <="{search_limits['date'][1]}" AND
-    HOUR(date_n_time) >={search_limits['hour'][0]} AND
-    HOUR(date_n_time) <={search_limits['hour'][1]} AND
-    YEAR(date_n_time) >={search_limits['year'][0]} AND
-    YEAR(date_n_time) <={search_limits['year'][1]} AND
-    MONTH(date_n_time) >={search_limits['month'][0]} AND
-    MONTH(date_n_time) <={search_limits['month'][1]} AND
-    DAY(date_n_time) >={search_limits['day'][0]} AND
-    DAY(date_n_time) <={search_limits['day'][1]} AND
-    amount >= {int(search_limits['amount'][0]) / conversion_ratio[currency]} AND
-    amount <= {int(search_limits['amount'][1]) / conversion_ratio[currency]}
+    ER.transaction_id = T.transaction_id AND
+    DATE(T.date_n_time) >="{search_limits['date'][0]}" AND
+    DATE(T.date_n_time) <="{search_limits['date'][1]}" AND
+    HOUR(T.date_n_time) >={search_limits['hour'][0]} AND
+    HOUR(T.date_n_time) <={search_limits['hour'][1]} AND
+    YEAR(T.date_n_time) >={search_limits['year'][0]} AND
+    YEAR(T.date_n_time) <={search_limits['year'][1]} AND
+    MONTH(T.date_n_time) >={search_limits['month'][0]} AND
+    MONTH(T.date_n_time) <={search_limits['month'][1]} AND
+    DAY(T.date_n_time) >={search_limits['day'][0]} AND
+    DAY(T.date_n_time) <={search_limits['day'][1]} AND
+    T.amount >= {int(search_limits['amount'][0]) / conversion_ratio[currency]} AND
+    T.amount <= {int(search_limits['amount'][1]) / conversion_ratio[currency]}
     ) as A
     ORDER BY {order_stringlist[0]+','+order_stringlist[1]+';' if(sortType == 'Time') else order_stringlist[1]+','+order_stringlist[0]+';'}
     '''
@@ -337,7 +343,7 @@ cap = cv2.VideoCapture(0)
 
 layout =  [
     [sg.Text('Welcome to ABC Bank! Do you want to start facial recognition?', size=(50,1), font=('Any',18), text_color='black', justification='center')],
-    [sg.Text('Confidence', key='cfd', visible=False), sg.Slider(range=(0,100),orientation='h', resolution=1, default_value=60, size=(15,15), key='confidence', visible=False)],
+    [sg.Text('Confidence', key='cfd', visible=False), sg.Slider(range=(0,100),orientation='h', resolution=1, default_value=100, size=(15,15), key='confidence', visible=False)],
     [sg.Button('Yes'), sg.Button('Login with password'), sg.Button('Exit', key='login_exit')]
       ]
 win = sg.Window('ABC Bank Login',
@@ -357,7 +363,7 @@ if event == 'Yes':
     gui_confidence = args["confidence"]
     win_started = False
 
-elif event == 'login_exit':
+elif event == 'login_exit' or event == 'Exit' or event == None:
     exit(0)
 else:
     win.Close()
@@ -417,9 +423,9 @@ else:
                 update =  "INSERT INTO Login_History VALUES ('%s', %i)" % (date, data[0])
                 cursor.execute(update)
                 myconn.commit()
-                hello = ("Hello ", globalCurrentName, "Welcome to the Bank ABC", "\nYour current login time is: %s" % (date))
+                hello = ("Hello ", globalCurrentName, "Welcome to the ABC Bank", "\nYour current login time is: %s" % (date))
                 break
-            if event == 'Exit':
+            if event == 'Exit' or event == None:
                 exit(0)
 
 
@@ -483,7 +489,7 @@ while recognize_face:
                 update =  "INSERT INTO Login_History VALUES ('%s', %i)" % (date, data[0])
                 cursor.execute(update)
                 myconn.commit()
-                hello = ("Hello ", globalCurrentName, "Welcome to the Bank ABC", "\nYour current login time is: %s" % (date))
+                hello = ("Hello ", globalCurrentName, "Welcome to the ABC Bank", "\nYour current login time is: %s" % (date))
                 engine.say(hello)
 
                 recognize_face = False
@@ -507,7 +513,7 @@ while recognize_face:
             [sg.Text('iKYC System Interface', size=(30,1))],
             [sg.Image(data=imgbytes, key='_IMAGE_')],
             [sg.Text('Confidence'),
-                sg.Slider(range=(0, 100), orientation='h', resolution=1, default_value=60, size=(15, 15), key='confidence')],
+                sg.Slider(range=(0, 100), orientation='h', resolution=1, default_value=100, size=(15, 15), key='confidence')],
             [sg.Exit()]
         ]
         win = sg.Window('iKYC System',
@@ -524,8 +530,10 @@ while recognize_face:
 
 
     if event is None or event == 'Exit':
+        exit(0)
         break
     gui_confidence = values['confidence']
+
 
 
 
@@ -541,7 +549,7 @@ history = cursor.fetchall()
 
 
 
-hello_msg_1 = 'Hello %s! Welcome to Bank ABC!' % (globalCurrentName)
+hello_msg_1 = 'Hello %s! Welcome to ABC Bank!' % (globalCurrentName)
 hello_msg_2 = 'Your current login time is: %s' % (date)
 
 
@@ -594,7 +602,6 @@ trans_received = choices_month
 
 
 
-
 #layout for search in sent tab in transaction view
 tab_layout_sent =  [[sg.T('Sent to others', size=(145, 1), justification='center')],
                     [sg.Table(values = [], headings=['Transaction ID', 'Description', 'Date and Time','Amount', "Receiver's Account", "Receiver's Bank"], col_widths=[12, 52, 20, 10, 15, 20],
@@ -620,6 +627,7 @@ tab_layout_received =  [[sg.T('Received from others', size=(145, 1), justificati
                     key='trans_received',)
                             ]
                         ]
+
 
 
 #layout for the GUI
@@ -689,7 +697,8 @@ win = sg.Window('Bank System',
         element_justification='c',
         default_element_size=(60, 30),
         text_justification='right',
-        auto_size_text=False).Layout(layout)
+        auto_size_text=False, resizable=True).Layout(layout)
+
 
 
 select_account = "SELECT account_id, account_type, balance, currency FROM Account WHERE customer_id=%i" % (data[0])
