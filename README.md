@@ -1,109 +1,55 @@
-# Face Recognition
+# COMP3278 Group 6 Project
+## Members
+<ul>
+  <li>Chan Yu Yan Sam 3035188203</li>
+  <li>Kwan Man Hei 3035460259</li>
+  <li>Srivastava Dhruv 3035667792</li>
+  <li>Tamanna Singhal 3035664647</li>
+  <li></li>
+</ul>
 
-Face recognition using python and mysql.
+## Execution Instructions
 
-*******
+### Step 1: Database Import
 
-## Useage
+Run the `facerecognition.sql` file. This will create a new database `comp3278gr6`, with some dummy data for the application.
 
-### Environment
+### Step 2: Environment Set Up
 
-Create virtual environment using Anaconda.
+Create virtual environment using Anaconda with the help of the `requirements.txt` file provided.
 ```
 conda create -n face python=3.x
 conda activate face
 pip install -r requirements.txt
 ```
+Activate the environment once ready.
 
-### MySQL Install
+### Step 3: Set up face recognition
 
-[Mac](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/macos-installation.html)
-
-[Ubuntu](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/linux-installation.html)
-
-[Windows](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/windows-installation.html)
-
-You'll obtain an account and password after installation, then you should modify the `faces.py`, with the corresponding
-`user` and `passwd`:
-```
-# create database connection
-myconn = mysql.connector.connect(host="localhost", user="root", passwd="xxxxx", database="facerecognition")
-```
-
-*******
-
-## Run
-
-### 1. Face Recognition
-
-#### 1.1 Collect Face Data
+#### Step 3.1: Face Data Collection
+Run the `face_capture.py` script to capture images for the user. As the dummy data already has entries for customers, please train the model according to the order in which the customers are present in the table by changing the value of the `user_name` variable to the names appearing in the customer table (the first name has already been added in the script). Before running the script, please ensure that a directory named `data` is present (the script may cause errors if the directory is not present).
 ```
 """
-user_name = "Jack"   # the name
+user_name = "Dhruv"   # the name
 NUM_IMGS = 400       # the number of saved images
 """
 python face_capture.py
 ```
-The camera will be activated and the captured images will be stored in `data/Jack` folder.      
-**Note:** Only one person’s images can be captured at a time.
-
-#### 1.2 Train a Face Recognition Model
+#### Step 3.2: Train the Model
+Run the `train.py` script to train the model.
 ```
 python train.py
 ```
 `train.yml` and `labels.pickle` will be created at the current folder.
 
-
-
-### 2. Database Design
-
-#### 2.1 Define Database
-**You need to** create tables in `facerecognition.sql`.      
-Here is a sample code for `Student`.
+### Step 4: Connect Script to the Database
+Before running the `COMP3278_GR6_Application.py` script, please connect the script with the database by changing `user` and `passwd` values as follows:
 ```
-# Create TABLE 'Customer'
-CREATE TABLE `Customer` (
-  `customer_id` int NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `login_time` time NOT NULL,
-  `login_date` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-LOCK TABLES `Customer` WRITE;
-/*!40000 ALTER TABLE `Customer` DISABLE KEYS */;
-INSERT INTO `Customer` VALUES (1, "JACK", NOW(), '2021-09-01');
-/*!40000 ALTER TABLE `Customer` ENABLE KEYS */;
-UNLOCK TABLES;
+# create database connection
+myconn = mysql.connector.connect(host="localhost", user="root", passwd="xxxxx", database="comp3278gr6")
 ```
-
-#### 2.2 Import Database
-Open mysql server and import the file `facerecognition.sql`.
+### Step 5: Run the Application
+Run the `COMP3278_GR6_Application.py` script to run the application (it may take some time to start). Please refer to the demo video on how to use the application.
 ```
-# login the mysql command
-mysql -u root -p
-
-# create database.  'mysql>' indicates we are now in the mysql command line
-mysql> CREATE DATABASE facerecognition;
-mysql> USE facerecognition;
-
-# import from sql file
-mysql> source facerecognition.sql
+python COMP3278_GR6_Application.py
 ```
-
-
-
-### 3. Login Interface
-
-#### 3.1 OpenCV GUI
-```
-python faces.py
-```
-
-#### 3.2 PySimpleGUI GUI
-```
-python faces_gui.py
-```
-
-The camera will be activated and recognize your face using the pretrained model.    
-**You need to** implement other useful functions in this part.
-
