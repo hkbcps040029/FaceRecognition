@@ -5,7 +5,7 @@
   <li>Kwan Man Hei 3035460259</li>
   <li>Srivastava Dhruv 3035667792</li>
   <li>Tamanna Singhal 3035664647</li>
-  <li></li>
+  <li>Oshi Garg 3035714325</li>
 </ul>
 
 ## Execution Instructions
@@ -16,7 +16,7 @@ Run the `facerecognition.sql` file. This will create a new database `comp3278gr6
 
 ### Step 2: Environment Set Up
 
-Create virtual environment using Anaconda with the help of the `requirements.txt` file provided.
+Create virtual environment using Anaconda with the help of the `requirements.txt` file provided (make 3.x the latest stable Python version).
 ```
 conda create -n face python=3.x
 conda activate face
@@ -43,7 +43,7 @@ python train.py
 `train.yml` and `labels.pickle` will be created at the current folder.
 
 ### Step 4: Connect Script to the Database
-Before running the `COMP3278_GR6_Application.py` script, please connect the script with the database by changing `user` and `passwd` values as follows:
+Before running the `COMP3278_GR6_Application.py` script, please connect the script with the database by changing `user` and `passwd` values as follows (where `xxxxx` is the password of the user's root):
 ```
 # create database connection
 myconn = mysql.connector.connect(host="localhost", user="root", passwd="xxxxx", database="comp3278gr6")
