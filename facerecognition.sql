@@ -7,8 +7,8 @@
 -- Server version: 5.7.28-0ubuntu0.18.04.4
 -- PHP Version: 7.2.24-0ubuntu0.18.04.1
 
-DROP DATABASE IF EXISTS `testDB`;
-CREATE DATABASE testDB;
+DROP DATABASE IF EXISTS `comp3278gr6`;
+CREATE DATABASE comp3278gr6;
 USE testDB;
 
 

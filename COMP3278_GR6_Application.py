@@ -18,7 +18,7 @@ globalAccountID = None
 prev_currency = 'HKD'
 
 # 1 Create database connection
-myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="testDB")
+myconn = mysql.connector.connect(host="localhost", user="root", passwd="123456", database="comp3278gr6")
 
 
 date = datetime.now()
