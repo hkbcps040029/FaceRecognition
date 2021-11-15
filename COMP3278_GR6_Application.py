@@ -735,7 +735,8 @@ while True:
 
     #if user selects an account from accounts table
     if event == '_ACCOUNT_TABLE_':
-        win.Element('_TV_').Update(visible=True)
+        if len(values['_ACCOUNT_TABLE_']) > 0:
+            win.Element('_TV_').Update(visible=True)
 
     #if user moves to login history view
     if event == 'Login History' or event == 'log_view':
